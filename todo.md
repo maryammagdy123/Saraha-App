@@ -9,7 +9,7 @@ api/auth/login-with-google
 api/users/profile (done)
 api/users/update-profile(done)
 api/users/delete-profile (done)
-api/users/password (done)
+api/users/update-password (done)
 
 
 /messages apis
@@ -22,3 +22,8 @@ DELETE api/messages/ ==> delete all messages
 
 
 //mailtrap==>https://mailtrap.io/inboxes/4431161/messages/5368041674
+
+
+upload files(multer)
+forgot password
+
