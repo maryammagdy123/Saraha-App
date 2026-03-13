@@ -21,9 +21,12 @@ DELETE api/messages/ ==> delete all messages
 
 
 
+<<<<<<< HEAD:todo.md
 //mailtrap==>https://mailtrap.io/inboxes/4431161/messages/5368041674
 
 
 upload files(multer)
 forgot password
 
+=======
+>>>>>>> 41048a5d3ba734b19ceb8f0c5b469ccc1b70f3ae:todo.txt
