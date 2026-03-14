@@ -9,7 +9,7 @@ const router = Router();
 //public routes
 router.post(
   "/signup",
-  uploadFiles().single("profilePicture"),
+  uploadFiles().none(),
   validation(registerSchema, "body"),
   controller.signup,
 );
