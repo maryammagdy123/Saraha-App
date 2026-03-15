@@ -62,7 +62,17 @@ export const changePassword = async (userId, currentPassword, newPassword) => {
 export const deleteProfile = async (userId) => {
   const user = await userRepo.findByIdAndDelete(userId);
   if (!user && user._id.toString() !== userId) {
-    UnauthorizedException({ message: "You are not authorized" });
+    return UnauthorizedException({ message: "You are not authorized" });
   }
   return true;
+};
+export const uploadProfilePic = async (userId, file) => {
+  const user = await userRepo.updateOne({
+    filter: { _id: userId },
+    update: { profilePicture: file.path },
+  });
+  if (!user) {
+    NotFoundException({ message: "User not found!" });
+  }
+  return user;
 };

@@ -29,7 +29,7 @@ router.put(
   verifyTokenMiddleware("strict"),
   uploadFiles().single("profile-picture"),
   fileValidation,
-  controller.uploadProfilePic,
+  controller.profilePic,
 );
 router.delete(
   "/profile",

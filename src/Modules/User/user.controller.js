@@ -65,17 +65,17 @@ export const deleteProfile = async (req, res, next) => {
   }
 };
 
-export const uploadProfilePic = async (req, res, next) => {
+export const profilePic = async (req, res, next) => {
   try {
     const userId = req.user.id;
-   
-    await service.profilePic(userId);
+
+    const updatedUser = await service.uploadProfilePic(userId, req.file);
     successResponse({
       res,
       status: 200,
       message: "Profile picture uploaded successfully!",
       data: {
-        success: true,
+        updatedUser,
       },
     });
   } catch (error) {
