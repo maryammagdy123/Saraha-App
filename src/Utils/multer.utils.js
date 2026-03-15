@@ -1,6 +1,6 @@
-import multer, { diskStorage } from "multer";
 import fs from "node:fs";
-import { BadRequestException } from "./Response/error.response";
+import multer, { diskStorage } from "multer";
+import { BadRequestException } from "./Response/error.response.js";
 export const uploadFiles = (
   allowedFormat = ["image/png", "image/jpg", "image/jpeg", "image/gif"],
 ) => {
