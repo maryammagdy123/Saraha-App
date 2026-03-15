@@ -12,8 +12,11 @@ export const fileValidation = async (req, res, next) => {
   const type = await fileTypeFromBuffer(buffer);
   // validate
   const allowedTypes = ["image/jpeg", "image/png"];
-  if (!type || !allowedTypes.includes(type.mime))
+  if (!type || !allowedTypes.includes(type.mime)) {
+    //delete uploaded file
+    fs.unlinkSync(filePath);
     return BadRequestException({ message: "Invalid file type!" });
+  }
 
   return next();
 };
