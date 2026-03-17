@@ -6,7 +6,7 @@ import {
   changePasswordSchema,
   updateProfileSchema,
 } from "./user.validation.js";
-import { uploadFiles } from "../../Utils/multer.utils.js";
+import { allowedFormat, uploadFiles } from "../../Utils/multer.utils.js";
 import { fileValidation } from "../../Middleware/file-validation.middleware.js";
 
 const router = Router();
@@ -18,18 +18,29 @@ router.patch(
   validation(updateProfileSchema),
   controller.updateProfile,
 );
-router.put(
+router.patch(
   "/profile/password",
   verifyTokenMiddleware("strict"),
   validation(changePasswordSchema),
   controller.updatePassword,
 );
-router.put(
-  "/profile/upload-profile-picture",
+router.patch(
+  "/profile/profile-picture",
   verifyTokenMiddleware("strict"),
-  uploadFiles().single("image"),
+  uploadFiles("user/profile-pic", [...allowedFormat.image], 10).single("image"),
   fileValidation,
   controller.profilePic,
+);
+
+router.patch(
+  "/profile/cover-photo",
+  verifyTokenMiddleware("strict"),
+  uploadFiles("user/cover-photo", [...allowedFormat.image], 10).array(
+    "cover",
+    2,
+  ),
+  fileValidation,
+  controller.coverPhoto,
 );
 router.delete(
   "/profile",

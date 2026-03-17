@@ -68,7 +68,9 @@ export const deleteProfile = async (userId) => {
   return true;
 };
 export const uploadProfilePic = async (userId, file) => {
-  const existUser = await userRepo.findById({ id:userId});
+  const existUser = await userRepo.findById({ id: userId });
+  //delete old uploaded profile picture , only the last one remains
+  fs.unlinkSync(existUser.profilePicture);
   const user = await userRepo.updateOne({
     filter: { _id: userId },
     update: { profilePicture: file.path },
@@ -77,7 +79,5 @@ export const uploadProfilePic = async (userId, file) => {
     NotFoundException({ message: "User not found!" });
   }
 
-  //delete old uploaded profile picture , only the last one remains
-  fs.unlinkSync(existUser.profilePicture);
   return user;
 };
