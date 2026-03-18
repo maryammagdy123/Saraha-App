@@ -1,5 +1,6 @@
 import { messageRepo, userRepo } from "../../DB/Repo/index.js";
 import {
+  BadRequestException,
   decryptMessage,
   encryptMessage,
   NotFoundException,
@@ -71,7 +72,11 @@ export const getInboxMessages = async (user) => {
       sort: { createdAt: -1 },
     },
   });
-
+  if (messages.length === 0) {
+    BadRequestException({
+      message: "You did not received any messages yet!",
+    });
+  }
   const decryptedMessages = getDecryptedMessage(messages, user);
   return decryptedMessages;
 };
@@ -90,6 +95,11 @@ export const getSentMessages = async (user) => {
       sort: { createdAt: -1 },
     },
   });
+  if (messages.length === 0) {
+    BadRequestException({
+      message: "You did not sent any messages yet!",
+    });
+  }
   const decryptedMessages = getDecryptedMessage(messages, user);
   return decryptedMessages;
 };

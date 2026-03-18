@@ -52,7 +52,7 @@ export const anonymousMessage = async (req, res, next) => {
     const { content } = req.body;
     const { receiverId } = req.params;
     const message = await service.sendAnonymousMessage(receiverId, content);
-    if (message)
+   
       return successResponse({
         res,
         status: 201,
