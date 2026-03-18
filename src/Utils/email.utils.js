@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 import { MAILTRAP_PASS, MAILTRAP_USER } from "../../config/config.service.js";
 
-export const sendOTPEmail = async (email, otp) => {
+export const sendOTPEmail = async (email, otp,subject) => {
   //mailtrap
   const transporter = nodemailer.createTransport({
     host: "sandbox.smtp.mailtrap.io",
@@ -16,7 +16,7 @@ export const sendOTPEmail = async (email, otp) => {
   const mailOptions = {
     from: '"Saraha App" <no-reply@saraha.com>',
     to: email,
-    subject: "Your OTP Code",
+    subject: subject,
     text: `Your OTP code is: ${otp}`,
   };
 

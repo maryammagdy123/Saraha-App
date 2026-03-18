@@ -33,7 +33,7 @@ export const signup = async (userData) => {
     otpExpires: Date.now() + 10 * 60 * 1000,
   });
 
-  await sendOTPEmail(user.email, otp);
+  await sendOTPEmail(user.email, otp,"Your Verification OTP code");
   const result = {
     id:user._id,
     username: user.username,
