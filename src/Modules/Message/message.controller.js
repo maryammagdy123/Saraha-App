@@ -76,3 +76,17 @@ export const markAsReadMessage = async (req, res, next) => {
     },
   });
 };
+
+export const unreadMessages = async (req, res, next) => {
+  const user = req.user;
+  const { count, unreadMessages } = await service.getUnreadMessages(user);
+  return successResponse({
+    res,
+    status: 200,
+    message: "Message marked as read successfully",
+    data: {
+      messages: unreadMessages,
+      count,
+    },
+  });
+};
