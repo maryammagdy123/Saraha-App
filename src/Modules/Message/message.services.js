@@ -123,3 +123,33 @@ export const readMessage = async (messageId, receiver) => {
   await message.save();
   return message;
 };
+
+export const getUnreadMessages = async (receiver) => {
+  const result = await messageRepo.aggregate([
+    {
+      $match: {
+        receiverId: receiver._id,
+        $or: [{ markAsRead: false }, { markAsRead: { $exists: false } }],
+      },
+    },
+    {
+      $facet: {
+        messages: [
+          { $sort: { createdAt: -1 } }, // optional
+        ],
+        count: [{ $count: "total" }],
+      },
+    },
+  ]);
+
+  const messages = result[0].messages;
+  const count = result[0].count[0]?.total || 0;
+
+  const decryptedMessages = getDecryptedMessage(messages, receiver);
+
+  return {
+    count,
+    unreadMessages: decryptedMessages,
+  };
+};
+
