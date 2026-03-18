@@ -4,6 +4,23 @@ import {
   encryptMessage,
   NotFoundException,
 } from "../../Utils/index.js";
+const getDecryptedMessage = (messages, owner) => {
+  const decryptedMessages = messages.map((msg) => {
+    let decryptedContent;
+    try {
+      decryptedContent = decryptMessage(msg.content, owner.privateKey);
+    } catch (error) {
+      decryptedContent = "[Cannot decrypt message]";
+    }
+
+    return {
+      ...msg.toObject(),
+      content: decryptedContent,
+    };
+  });
+
+  return decryptedMessages;
+};
 
 export const sendMessage = async (senderId, receiverId, message) => {
   const findReceiver = await userRepo.findById({ id: receiverId });
@@ -23,8 +40,8 @@ export const sendMessage = async (senderId, receiverId, message) => {
   return result;
 };
 
-export const sendAnonymousMessage=async(receiverId, message)=>{
- const findReceiver = await userRepo.findById({ id: receiverId });
+export const sendAnonymousMessage = async (receiverId, message) => {
+  const findReceiver = await userRepo.findById({ id: receiverId });
 
   if (!findReceiver) {
     NotFoundException({ message: "User Not Found!" });
@@ -38,13 +55,12 @@ export const sendAnonymousMessage=async(receiverId, message)=>{
   });
 
   return result;
-}
+};
 
-export const getUserMessages = async (userId) => {
-  const owner = await userRepo.findOne({ filter: { _id: userId } });
-  console.log(owner.privateKey)
+//received messages(inbox)
+export const getInboxMessages = async (user) => {
   const messages = await messageRepo.find({
-    receiverId: userId,
+    receiverId: user._id,
     populate: [
       {
         path: "senderId",
@@ -56,19 +72,24 @@ export const getUserMessages = async (userId) => {
     },
   });
 
-  const decryptedMessages = messages.map((msg) => {
-    let decryptedContent;
-    try {
-      decryptedContent = decryptMessage(msg.content, owner.privateKey);
-    } catch (error) {
-      decryptedContent = "[Cannot decrypt message]";
-    }
+  const decryptedMessages = getDecryptedMessage(messages, user);
+  return decryptedMessages;
+};
 
-    return {
-      ...msg.toObject(),
-      content: decryptedContent,
-    };
+//sent messages
+export const getSentMessages = async (user) => {
+  const messages = await messageRepo.find({
+    senderId: user._id,
+    populate: [
+      {
+        path: "receiverId",
+        select: "username email",
+      },
+    ],
+    options: {
+      sort: { createdAt: -1 },
+    },
   });
-
+  const decryptedMessages = getDecryptedMessage(messages, user);
   return decryptedMessages;
 };
