@@ -4,6 +4,7 @@ import {
   decryptMessage,
   encryptMessage,
   NotFoundException,
+  UnauthorizedException,
 } from "../../Utils/index.js";
 const getDecryptedMessage = (messages, owner) => {
   const decryptedMessages = messages.map((msg) => {
@@ -102,4 +103,23 @@ export const getSentMessages = async (user) => {
   }
   const decryptedMessages = getDecryptedMessage(messages, user);
   return decryptedMessages;
+};
+
+//mark read messages
+export const readMessage = async (messageId, receiver) => {
+  const message = await messageRepo.findById({ id: messageId });
+
+  if (!message) {
+    NotFoundException({ message: "Message not found!" });
+  }
+  console.log(message.receiverId, receiver._id);
+  if (message.receiverId.toString() !== receiver._id.toString()) {
+    UnauthorizedException({ message: "You are not authorized!" });
+  }
+  if (message.markAsRead) {
+    return message;
+  }
+  message.markAsRead = true;
+  await message.save();
+  return message;
 };
