@@ -1,4 +1,46 @@
 # Sara7a App API Documentation
+# 📩 Secure Messaging System API
+
+A security-focused messaging system backend built with Node.js, Express, and MongoDB.
+
+The project simulates real-world messaging applications with a strong emphasis on security, clean architecture, and scalability.
+
+---
+
+## 🚀 Features
+
+- 🔐 Encrypted messaging (only sender & receiver can decrypt)
+- 📥 Inbox & 📤 Sent messages handling
+- 🔑 JWT Authentication & Authorization
+- 🔢 OTP generation for secure verification
+- ✅ Input validation using Joi
+- 📎 File upload validation
+- 🧩 Modular architecture (Controller → Service → Model)
+- ⚡ RESTful API design
+
+---
+
+## 🛠️ Tech Stack
+
+- Node.js
+- Express.js
+- MongoDB & Mongoose
+- Joi Validation
+- JWT Authentication
+
+---
+## 🧠 Security Highlights
+
+- Message content is encrypted and cannot be accessed without proper keys
+- OTP system for secure verification
+- Input validation to prevent invalid or malicious data
+- File upload validation for safe media handling
+- Protected routes using JWT
+
+---
+
+
+
 
 > Base URL: `{{baseUrl}}`
 
