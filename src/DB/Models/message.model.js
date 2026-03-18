@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
+import { Schema } from "mongoose";
 
-const messageSchema = new mongoose.Schema(
+const messageSchema = new Schema(
   {
     content: {
       type: String,
@@ -8,18 +9,18 @@ const messageSchema = new mongoose.Schema(
     },
 
     receiverId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
 
     senderId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "User",
       default: null, // lw el sender is anonymous let db set senderId to null if not get the sender id from token of the logged in user(sender)
     },
 
-    markAsRead: { type: mongoose.Schema.Types.Boolean, default: false },
+    markAsRead: { type: Boolean, default: false },
   },
   { timestamps: true },
 );
