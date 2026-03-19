@@ -2,8 +2,12 @@
 import express from "express";
 import { PORT } from "../config/config.service.js";
 import { authenticationDB } from "./DB/index.js";
-import {NotFoundException } from "./Utils/index.js";
-import { authRouter, messageRouter, userRouter, } from "./Modules/index.js";
+import { NotFoundException } from "./Utils/index.js";
+import {
+  authRouter,
+  messageRouter,
+  userRouter,
+} from "./Modules/index.js";
 import { globalErrorHandling } from "./Middleware/error.middleware.js";
 
 const bootstrap = async () => {
@@ -15,6 +19,7 @@ const bootstrap = async () => {
     res.json("Assignment-9!");
   });
   app.use("/api/auth", authRouter);
+  app.use("api/auth/account", otpRouter);
   app.use("/api/user", userRouter);
   app.use("/api/message", messageRouter);
   app.all("{/*dummy}", async (req, res, next) => {
