@@ -7,6 +7,7 @@ import {
   authRouter,
   messageRouter,
   userRouter,
+  otpRouter
 } from "./Modules/index.js";
 import { globalErrorHandling } from "./Middleware/error.middleware.js";
 
@@ -19,7 +20,7 @@ const bootstrap = async () => {
     res.json("Assignment-9!");
   });
   app.use("/api/auth", authRouter);
-  app.use("api/account", otpRouter);
+  app.use("/api/account", otpRouter);
   app.use("/api/user", userRouter);
   app.use("/api/message", messageRouter);
   app.all("{/*dummy}", async (req, res, next) => {
