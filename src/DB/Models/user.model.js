@@ -30,12 +30,7 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
 
-    otp: {
-      type: String,
-    },
-    otpExpires: {
-      type: Date,
-    },
+
 
     publicKey: {
       type: String,
