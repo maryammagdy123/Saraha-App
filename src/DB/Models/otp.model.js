@@ -20,14 +20,14 @@ const OtpSchema = new Schema(
       type: Number,
       default: 0,
     },
-
     expiresAt: {
       type: Date,
-      index: { expires: 0 },
+      index: {
+        expires: 0,
+      },
     },
   },
   { timestamps: true },
 );
-OtpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 export const OtpModel = mongoose.model("OTP", OtpSchema);
