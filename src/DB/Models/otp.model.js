@@ -6,6 +6,11 @@ const OtpSchema = new Schema(
       type: String,
       required: true,
     },
+    otp:{
+        type:String,
+        required:true
+    },
+    
     otpType: {
       type: String,
       enum: ["verify", "reset"],
