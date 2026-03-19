@@ -10,11 +10,11 @@ import {
 import * as service from "./auth.services.js";
 export const signup = async (req, res, next) => {
   try {
-    const isExist = await service.checkExistence(req.body.email);
-    console.log(req.body.email);
-    if (isExist) {
-      ConflictException({ message: "User already exist, login instead!" });
-    }
+    // const isExist = await service.checkExistence(req.body.email);
+    // console.log(req.body.email);
+    // if (isExist) {
+    //   ConflictException({ message: "User already exist, login instead!" });
+    // }
     const user = await service.signup(req.body);
     return successResponse({
       res,
