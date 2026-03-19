@@ -43,40 +43,40 @@ export const signup = async (userData) => {
   };
   return result;
 };
-export const confirmOtp = async (email, otp) => {
-  const user = await userRepo.findOne({ filter: { email } });
-  if (!user) {
-    NotFoundException({ message: "User Not Found" });
-  }
+// export const confirmOtp = async (email, otp) => {
+//   const user = await userRepo.findOne({ filter: { email } });
+//   if (!user) {
+//     NotFoundException({ message: "User Not Found" });
+//   }
 
-  if (user.isConfirmed) {
-    AlreadyConfirmed({ message: "User already confirmed!" });
-  }
-  if (!user.otp || !user.otpExpires) {
-    BadRequestException({ message: "No OTP found" });
-  }
+//   if (user.isConfirmed) {
+//     AlreadyConfirmed({ message: "User already confirmed!" });
+//   }
+//   if (!user.otp || !user.otpExpires) {
+//     BadRequestException({ message: "No OTP found" });
+//   }
 
-  if (user.otpExpires < Date.now()) {
-    user.otp = null;
-    user.otpExpires = null;
-    await user.save();
-    BadRequestException({ message: "OTP has expired" });
-  }
+//   if (user.otpExpires < Date.now()) {
+//     user.otp = null;
+//     user.otpExpires = null;
+//     await user.save();
+//     BadRequestException({ message: "OTP has expired" });
+//   }
 
-  const isCompare = await compare(otp, user.otp);
+//   const isCompare = await compare(otp, user.otp);
 
-  if (!isCompare) {
-    BadRequestException({ message: "Invalid OTP" });
-  }
+//   if (!isCompare) {
+//     BadRequestException({ message: "Invalid OTP" });
+//   }
 
-  user.isConfirmed = true;
-  user.otp = null;
-  user.otpExpires = null;
+//   user.isConfirmed = true;
+//   user.otp = null;
+//   user.otpExpires = null;
 
-  await user.save();
+//   await user.save();
 
-  return user;
-};
+//   return user;
+// };
 export const login = async (email, password) => {
   let existUser = await userRepo.findOne({ filter: { email } });
   if (!existUser) {
