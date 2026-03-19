@@ -73,18 +73,18 @@ export const refreshToken = async (req, res, next) => {
     next(error);
   }
 };
-export const confirmOtp = async (req, res, next) => {
-  try {
-    const { email, otp } = req.body;
-    console.log(req.body);
-    const result = await service.confirmOtp(email, otp);
-    return successResponse({
-      res,
-      status: 200,
-      message: "Your email confirmed successfully",
-      data: { status: result.isConfirmed },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+// export const confirmOtp = async (req, res, next) => {
+//   try {
+//     const { email, otp } = req.body;
+//     console.log(req.body);
+//     const result = await service.confirmOtp(email, otp);
+//     return successResponse({
+//       res,
+//       status: 200,
+//       message: "Your email confirmed successfully",
+//       data: { status: result.isConfirmed },
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
