@@ -15,6 +15,14 @@ const password = Joi.string()
     "string.pattern.base": "Password contains invalid characters",
   });
 
+const confirmPassword = Joi.string()
+  .valid(Joi.ref("password"))
+  .required()
+  .messages({
+    "any.only": "Passwords do not match",
+    "string.empty": "Confirm password is required",
+  });
+
 const username = Joi.string().min(3).max(30).required();
 
 // ==========================
@@ -40,4 +48,10 @@ export const loginSchema = Joi.object({
 export const confirmOtpSchema = Joi.object({
   email: Joi.string().email().required(),
   otp: Joi.string().length(6).required(),
+});
+
+export const resetPasswordSchema = Joi.object({
+  email,
+  password,
+  confirmPassword,
 });

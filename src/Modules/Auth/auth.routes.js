@@ -6,6 +6,7 @@ import {
   confirmOtpSchema,
   loginSchema,
   registerSchema,
+  resetPasswordSchema,
 } from "./auth.validation.js";
 import { uploadFiles } from "../../Utils/multer.utils.js";
 
@@ -26,7 +27,7 @@ router.patch(
 );
 router.patch(
   "/reset-password",
-  validation(passwordSchema, "body"),
+  validation(resetPasswordSchema, "body"),
   controller.resetPassword,
 );
 /*===========Protected routes============= */
