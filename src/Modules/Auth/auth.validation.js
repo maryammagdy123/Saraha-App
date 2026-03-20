@@ -51,7 +51,6 @@ export const confirmOtpSchema = Joi.object({
 });
 
 export const resetPasswordSchema = Joi.object({
-  email,
   password,
   confirmPassword,
 });

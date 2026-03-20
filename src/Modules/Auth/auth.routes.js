@@ -25,10 +25,12 @@ router.patch(
   validation(confirmOtpSchema, "body"),
   controller.accountVerification,
 );
+router.post("/forgot-password", controller.forgotPassword);
+router.patch("/confirm-password-otp", controller.confirmResetPassOTP);
 router.patch(
   "/reset-password",
-  validation(resetPasswordSchema, "body"),
-  controller.resetPassword,
+  validation(resetNewPassword, "body"),
+  controller.resetNewPassword,
 );
 /*===========Protected routes============= */
 // router.post(

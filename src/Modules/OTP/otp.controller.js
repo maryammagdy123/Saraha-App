@@ -1,4 +1,5 @@
 import { successResponse } from "../../Utils/Response/success.response.js";
+import { checkExistence } from "../Auth/auth.services.js";
 import * as service from "./otp.services.js";
 export const resendVerifyOTP = async (req, res, next) => {
   try {

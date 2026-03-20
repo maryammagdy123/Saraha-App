@@ -82,7 +82,7 @@ export const accountVerification = async (req, res, next) => {
       res,
       status: 200,
       message: "Your email confirmed successfully",
-      data: { status: result.acknowledged },
+      data: { result: result.acknowledged },
     });
   } catch (error) {
     next(error);
@@ -100,4 +100,34 @@ export const forgotPassword = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+export const confirmResetPassOTP = async (req, res, next) => {
+  try {
+    const { otp } = req.body;
+    const result = await service.resetPassOTPConfirmation(otp);
+    return successResponse({
+      res,
+      status: 200,
+      message: "OTP confirmed sccussfully!",
+      data: {
+        result: true,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+export const resetNewPassword = async (req, res, next) => {
+  try {
+    const { password, confirmPassword } = req.body;
+    const result = await service.resetPassword(password, confirmPassword);
+    return successResponse({
+      res,
+      status: 200,
+      message: "Your password changed successfully!",
+      data: {
+        result: result.acknowledged,
+      },
+    });
+  } catch (error) {}
 };

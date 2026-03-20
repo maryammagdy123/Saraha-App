@@ -119,7 +119,7 @@ export const verifyAccount = async (email, otp, type) => {
   }
 
   //verify otp
-  await verifyOTP(email, otp, type);
+  await verifyOTP(otp, type, email);
   const updatedUser = await userRepo.updateOne({
     filter: { email },
     update: { isConfirmed: true },
@@ -143,6 +143,13 @@ export const forgotPasswordOTP = async (email) => {
       message: "Your account is not verified yet , please verify it!",
     });
   }
-  await generateAndSendOTP(email, "reset_password");
+  await generateAndSendOTP(email, "reset");
   return true;
 };
+
+export const resetPassOTPConfirmation = async (otp) => {
+  return await verifyOTP(otp, "reset");
+};
+// export const resetPassword = async (password) => {
+
+// };

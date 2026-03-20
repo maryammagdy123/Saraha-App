@@ -12,10 +12,18 @@ export const getSubjectByType = (type) => {
   switch (type) {
     case "verify":
       return "Verify Your Account";
-    case "reset_password":
+    case "reset":
       return "Reset Your Password";
     default:
       return "Your OTP Code";
+  }
+};
+const expiresAtByType = (type) => {
+  switch (type) {
+    case "reset":
+      return new Date(Date.now() + 10 * 60 * 1000);
+    default:
+      return new Date(Date.now() + 5 * 60 * 1000);
   }
 };
 export const generateAndSendOTP = async (email, type) => {
@@ -29,7 +37,7 @@ export const generateAndSendOTP = async (email, type) => {
     email,
     otp: hashedOtp,
     otpType: type,
-    expiresAt: Date.now() + 5 * 60 * 1000,
+    expiresAt: expiresAtByType(type),
   });
   await sendOTPEmail(email, otp, getSubjectByType(type));
   console.log(otpDoc);
@@ -38,7 +46,7 @@ export const generateAndSendOTP = async (email, type) => {
 
 export const resendOTP = async (email, type) => {
   const user = await checkExistence(email);
-  if (user.isConfirmed) {
+  if (user.isConfirmed || !user) {
     throw new Error("cannot send otp!");
   }
   const isOTPExistBefore = await otpRepo.findOne({ filter: { email } });
@@ -51,10 +59,13 @@ export const resendOTP = async (email, type) => {
   return otp;
 };
 
-export const verifyOTP = async (email, otp, type) => {
+export const verifyOTP = async (otp, type, email = null) => {
   //check if user has an otp
+  const filter = { otpType: type };
+  if (email) filter.email = email;
+
   const otpDoc = await otpRepo.findOne({
-    filter: { email, otpType: type },
+    filter,
   });
 
   if (!otpDoc) {
