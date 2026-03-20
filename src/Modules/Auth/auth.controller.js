@@ -88,15 +88,14 @@ export const accountVerification = async (req, res, next) => {
     next(error);
   }
 };
-export const resetPassword = async (req, res, next) => {
+export const forgotPassword = async (req, res, next) => {
   try {
-    const { email, password, confirmPassword } = req.body;
-    await service.forgotPassword(email, password, confirmPassword);
+    const { email } = req.body;
+    await service.forgotPasswordOTP(email);
     return successResponse({
       res,
       status: 200,
-      message: "Your password has been successfully reset!",
-      data: { status: result.acknowledged },
+      message: "Reset Password OTP sent to your email successfully!",
     });
   } catch (error) {
     next(error);
