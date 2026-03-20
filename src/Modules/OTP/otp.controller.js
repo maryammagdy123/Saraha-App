@@ -14,7 +14,7 @@ export const verifyEmail = async (req, res, next) => {
   }
 };
 
-export const resendOTP = async (req, res, next) => {
+export const resendVerifyOTP = async (req, res, next) => {
   try {
     const { email } = req.body;
     await service.resendOTP(email);

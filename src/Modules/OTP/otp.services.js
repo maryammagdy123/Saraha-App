@@ -27,14 +27,14 @@ export const generateAndSendOTP = async (email, type, subject) => {
   return otpDoc;
 };
 
-export const resendOTP = async (email) => {
+export const resendOTP = async (email, type) => {
   const isOTPExistBefore = await otpRepo.findOne({ filter: { email } });
   if (isOTPExistBefore) {
     BadRequestException({
       message: "We already sent you an otp and its still valid!",
     });
   }
-  const otp = await generateAndSendOTP(email, "verify");
+  const otp = await generateAndSendOTP(email, type);
   return otp;
 };
 
