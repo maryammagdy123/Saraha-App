@@ -2,10 +2,6 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    profilePicture: {
-      type: String,
-      required: false,
-    },
     username: {
       type: String,
       required: true,
@@ -30,8 +26,6 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
 
-
-
     publicKey: {
       type: String,
       required: true,
@@ -40,6 +34,14 @@ const userSchema = new mongoose.Schema(
     privateKey: {
       type: String,
       required: true,
+    },
+    profilePicture: {
+      type: String,
+      required: false,
+    },
+    coverPhotos: {
+      type: [String],
+      required: false,
     },
   },
   { timestamps: true },

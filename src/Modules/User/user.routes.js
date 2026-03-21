@@ -8,7 +8,10 @@ import {
 } from "./user.validation.js";
 
 import { fileValidation } from "../../Middleware/file-validation.middleware.js";
-import { allowedFormat, uploadFiles } from "../../Utils/Multer/local.multer.utils.js";
+import {
+  allowedFormat,
+  uploadFiles,
+} from "../../Utils/Multer/local.multer.utils.js";
 
 const router = Router();
 
@@ -25,12 +28,20 @@ router.patch(
   validation(changePasswordSchema),
   controller.updatePassword,
 );
+//==========================upload files locally=========================================================
 router.patch(
   "/profile/profile-picture",
   verifyTokenMiddleware("strict"),
   uploadFiles("/profile-pic", [...allowedFormat.image], 10).single("image"),
   fileValidation,
   controller.profilePic,
+);
+router.patch(
+  "/profile/cover-picture",
+  verifyTokenMiddleware("strict"),
+  uploadFiles("/cover-pic", [...allowedFormat.image], 10).single("coverPhoto"),
+  fileValidation,
+  controller.coverPhoto,
 );
 
 // router.patch(

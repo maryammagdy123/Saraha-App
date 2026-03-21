@@ -88,14 +88,14 @@ export const profilePic = async (req, res, next) => {
 
 export const coverPhoto = async (req, res, next) => {
   try {
-    const uploadedCover = await service.uploadCoverPhotos(req.user, req.files);
+    const uploadedCover = await service.uploadCoverPhotos(req.user, req.file);
     return successResponse({
       res,
       status: 200,
-      message: "Profile picture uploaded successfully!",
+      message: "Cover picture uploaded successfully!",
       data: {
         success: true,
-        "cover-photos": uploadedCover,
+        cover: uploadedCover,
       },
     });
   } catch (error) {

@@ -26,13 +26,13 @@ router.patch(
   validation(confirmOtpSchema, "body"),
   controller.accountVerification,
 );
-router.post("/forgot-password", controller.forgotPassword);
-router.patch("/confirm-password-otp", controller.confirmResetPassOTP);
-router.patch(
-  "/reset-password",
-  validation(resetNewPassword, "body"),
-  controller.resetNewPassword,
-);
+// router.post("/forgot-password", controller.forgotPassword);
+// router.patch("/confirm-password-otp", controller.confirmResetPassOTP);
+// router.patch(
+//   "/reset-password",
+//   validation(resetNewPassword, "body"),
+//   controller.resetNewPassword,
+// );
 /*===========Protected routes============= */
 // router.post(
 //   "/refresh-token",

@@ -46,10 +46,12 @@ export const generateAndSendOTP = async (email, type) => {
 
 export const resendOTP = async (email, type) => {
   const user = await checkExistence(email);
-  if (user.isConfirmed || !user) {
+  if (user?.isConfirmed || !user) {
     throw new Error("cannot send otp!");
   }
-  const isOTPExistBefore = await otpRepo.findOne({ filter: { email } });
+  const isOTPExistBefore = await otpRepo.findOne({
+    filter: { email, otpType: type },
+  });
   if (isOTPExistBefore) {
     BadRequestException({
       message: "We already sent you an otp and its still valid!",
@@ -59,10 +61,9 @@ export const resendOTP = async (email, type) => {
   return otp;
 };
 
-export const verifyOTP = async (otp, type, email ) => {
+export const verifyOTP = async (otp, type, email) => {
   //check if user has an otp
-  const filter = { otpType: type , email};
-
+  const filter = { otpType: type, email };
 
   const otpDoc = await otpRepo.findOne({
     filter,

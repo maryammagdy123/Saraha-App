@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { userRepo } from "../../DB/Repo/index.js";
 import {
+  BadRequestException,
   compare,
   ConflictException,
   decrypt,
@@ -96,4 +97,12 @@ export const uploadProfilePic = async (user, file) => {
   return user;
 };
 
-export const uploadCoverPhotos = async (user, file) => {};
+export const uploadCoverPhotos = async (user, file) => {
+  //check images count , if already 2 replace new one with the oldest one
+  if (user.coverPhotos.length >= 2) {
+    user.coverPhotos.shift();
+  }
+  user.coverPhotos.push(file.finalPath);
+  user.save();
+  return file;
+};

@@ -125,7 +125,7 @@ export const verifyAccount = async (email, otp, type) => {
     update: { isConfirmed: true },
   });
   if (updatedUser) {
-    await otpRepo.deleteOne({ email });
+    await otpRepo.deleteOne({ email,otpType:type });
   }
   return updatedUser;
 };
