@@ -6,8 +6,9 @@ import {
   changePasswordSchema,
   updateProfileSchema,
 } from "./user.validation.js";
-import { allowedFormat, uploadFiles } from "../../Utils/multer.utils.js";
+
 import { fileValidation } from "../../Middleware/file-validation.middleware.js";
+import { allowedFormat, uploadFiles } from "../../Utils/Multer/local.multer.utils.js";
 
 const router = Router();
 

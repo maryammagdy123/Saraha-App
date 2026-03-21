@@ -8,7 +8,8 @@ import {
   registerSchema,
   resetPasswordSchema,
 } from "./auth.validation.js";
-import { uploadFiles } from "../../Utils/multer.utils.js";
+import { uploadFiles } from "../../Utils/Multer/local.multer.utils.js";
+
 
 const router = Router();
 //public routes
