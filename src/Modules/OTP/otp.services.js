@@ -59,10 +59,10 @@ export const resendOTP = async (email, type) => {
   return otp;
 };
 
-export const verifyOTP = async (otp, type, email = null) => {
+export const verifyOTP = async (otp, type, email ) => {
   //check if user has an otp
-  const filter = { otpType: type };
-  if (email) filter.email = email;
+  const filter = { otpType: type , email};
+
 
   const otpDoc = await otpRepo.findOne({
     filter,

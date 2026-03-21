@@ -130,26 +130,26 @@ export const verifyAccount = async (email, otp, type) => {
   return updatedUser;
 };
 
-export const forgotPasswordOTP = async (email) => {
-  const user = await checkExistence(email);
-  if (!user) {
-    BadRequestException({
-      message: "Please make sure the email you entered is correct!!",
-    });
-  }
-  //check if user confirmed
-  if (!user.isConfirmed) {
-    BadRequestException({
-      message: "Your account is not verified yet , please verify it!",
-    });
-  }
-  await generateAndSendOTP(email, "reset");
-  return true;
-};
+// export const forgotPasswordOTP = async (email) => {
+//   const user = await checkExistence(email);
+//   if (!user) {
+//     BadRequestException({
+//       message: "Please make sure the email you entered is correct!!",
+//     });
+//   }
+//   //check if user confirmed
+//   if (!user.isConfirmed) {
+//     BadRequestException({
+//       message: "Your account is not verified yet , please verify it!",
+//     });
+//   }
+//   await generateAndSendOTP(email, "reset");
+//   return true;
+// };
 
-export const resetPassOTPConfirmation = async (otp) => {
-  return await verifyOTP(otp, "reset");
-};
+// export const resetPassOTPConfirmation = async (otp,email) => {
+//   return await verifyOTP(otp, "reset",email);
+// };
 // export const resetPassword = async (password) => {
 
 // };
