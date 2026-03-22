@@ -17,6 +17,20 @@ export const uploadFile = async ({ file, folder }) => {
     folder: `${APP_NAME}/${folder}`,
   });
 };
+
+export const uploadFiles = async ({ files, folder }) => {
+  let attachments = [];
+  for (const file of files) {
+    const { public_id, secure_url } = await cloudinary.uploader.upload(
+      file.path,
+      {
+        folder: `${APP_NAME}/${folder}`,
+      },
+    );
+    attachments.push({ public_id, secure_url });
+  }
+  return attachments;
+};
 export const destroyFile = async (public_id) => {
   return await cloudinary.uploader.destroy(public_id);
 };
