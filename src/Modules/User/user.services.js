@@ -22,13 +22,13 @@ export const getProfile = async (userId) => {
     NotFoundException({ message: "User Not Found!" });
   }
 
-  if (user._id.toString() !== userId) {
+  if (user._id.toString() !== userId.toString()) {
     UnauthorizedException({ message: "You are not authorized" });
   }
   return user;
 };
 
-export const updateProfile = async (userId, data) => {
+export const updateProfile = async (user, data) => {
   if (data.email) {
     const alreadyExist = await checkExistence(data.email);
     if (alreadyExist) {
@@ -37,9 +37,8 @@ export const updateProfile = async (userId, data) => {
       });
     }
   }
-
   const updatedUser = await userRepo.findByIdAndUpdate({
-    id: userId,
+    id: user._id,
     update: data,
   });
 
