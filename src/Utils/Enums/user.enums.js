@@ -6,3 +6,7 @@ export const ProviderEnum = {
   System: 0,
   Google: 1,
 };
+export const SignatureEnum = {
+  Admin: 0,
+  User: 1,
+};
