@@ -1,5 +1,6 @@
 // validation schema
 import Joi from "joi";
+import { RoleEnum } from "../../Utils/Enums/user.enums.js";
 
 // reusable fields
 const email = Joi.string().email().required();
@@ -32,6 +33,10 @@ export const registerSchema = Joi.object({
   username,
   email,
   password,
+
+  role: Joi.number()
+    .valid(...Object.values(RoleEnum))
+    .default(RoleEnum.User),
 });
 
 // ==========================
