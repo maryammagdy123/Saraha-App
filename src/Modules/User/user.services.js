@@ -147,3 +147,14 @@ export const getUserProfile = async (userId) => {
 
   return (safeUser = getUserWithNoSensitiveData(user));
 };
+export const visitCount = async (userId) => {
+  const user = await userRepo.findById({
+    id: userId,
+    projection: {profileVisits:1},
+  });
+  if (!user) {
+    NotFoundException({ message: "User not found" });
+  }
+
+  return user;
+};

@@ -118,7 +118,7 @@ export const coverPhoto = async (req, res, next) => {
 };
 export const visitUser = async (req, res, next) => {
   try {
-    const {userId} = req.params;
+    const { userId } = req.params;
     const visitedUser = await service.getUserProfile(userId);
     return successResponse({
       res,
@@ -126,6 +126,22 @@ export const visitUser = async (req, res, next) => {
       message: "done",
       data: {
         visitedUser,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+export const getVisitCount = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const result = await service.visitCount(userId);
+     return successResponse({
+      res,
+      status: 200,
+      message: "done",
+      data: {
+       result,
       },
     });
   } catch (error) {

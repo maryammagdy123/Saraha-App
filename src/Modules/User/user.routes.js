@@ -12,6 +12,7 @@ import {
   allowedFormat,
   uploadFiles,
 } from "../../Utils/Multer/local.multer.utils.js";
+import { RoleEnum } from "../../Utils/Enums/user.enums.js";
 
 const router = Router();
 
@@ -72,5 +73,11 @@ router.get(
   "/profile/:userId",
   verifyTokenMiddleware("optional"),
   controller.visitUser,
+);
+
+router.get(
+  "/:userId/profile-visit-count",
+  verifyTokenMiddleware("strict", [RoleEnum.Admin]),
+  controller.getVisitCount,
 );
 export default router;
