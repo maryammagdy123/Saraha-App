@@ -1,4 +1,5 @@
 import { REFRESH_TOKEN_SECRET_KEY } from "../../../config/config.service.js";
+import { redisClient } from "../../DB/index.js";
 import { otpRepo, userRepo } from "../../DB/Repo/index.js";
 import {
   BadRequestException,
@@ -13,85 +14,93 @@ import {
 } from "../../Utils/index.js";
 
 import { generateAndSendOTP, verifyOTP } from "../OTP/otp.services.js";
+import { getUserWithNoSensitiveData } from "../User/user.services.js";
 
 export const checkExistence = async (email) => {
   return await userRepo.findOne({ filter: { email } });
 };
-
+export const checkKeyExistence = async (key) => {
+  return await redisClient.exists(key);
+};
+const getFromCache = async (key) => {
+  const cached = await redisClient.get(key);
+  if (cached) return JSON.parse(cached);
+  return null;
+  //returns key value or null
+};
+const saveInCache = async (key, value, ex = 1 * 24 * 60 * 60) => {
+  value = JSON.stringify(value);
+  return redisClient.set(key, value, {
+    EX: ex,
+  });
+  //returns" ok" if success
+};
+//SIGNUP AND SAVING USERS INTO REDIS CACHE UNTIL THEY VERIFY THEIR ACCOUNTS THEN SAVING THEM INTO DB
 export const signup = async (userData) => {
+  const keyExist = await checkKeyExistence(userData.email);
   const userExist = await checkExistence(userData.email);
-  if (userExist && userExist.isConfirmed) {
-    ConflictException({
-      message: "This email is already verified, please login instead!",
-    });
-  }
 
-  if (userExist && userExist.isConfirmed === false) {
+  if (keyExist === 1 || userExist) {
     ConflictException({
       message: "This email is already in use!",
     });
   }
+
   const { privateKey, publicKey } = generateKeyPair();
   const hashedPassword = await hash(userData.password);
+  userData.password = hashedPassword;
 
-  const user = await userRepo.create({
-    username: userData.username,
-    email: userData.email,
-    password: hashedPassword,
-    publicKey: publicKey,
-    privateKey: privateKey,
+  //save user into cache
+  const result = await saveInCache(userData.email, {
+    ...userData,
+    privateKey,
+    publicKey,
   });
-
+  //send otp to users email
   await generateAndSendOTP(userData.email, "verify");
-  const result = {
-    id: user._id,
-    username: user.username,
-    email: user.email,
-    isConfirmed: user.isConfirmed,
-  };
+  //return users data
   return result;
 };
-// export const confirmOtp = async (email, otp) => {
-//   const user = await userRepo.findOne({ filter: { email } });
-//   if (!user) {
-//     NotFoundException({ message: "User Not Found" });
+
+//SIGNUP AND SAVING USERS INTO DB BEFORE ACCOUNT BEING VERIFIED
+// export const signup = async (userData) => {
+//   const userExist = await checkExistence(userData.email);
+//   if (userExist && userExist.isConfirmed) {
+//     ConflictException({
+//       message: "This email is already verified, please login instead!",
+//     });
 //   }
 
-//   if (user.isConfirmed) {
-//     AlreadyConfirmed({ message: "User already confirmed!" });
+//   if (userExist && userExist.isConfirmed === false) {
+//     ConflictException({
+//       message: "This email is already in use!",
+//     });
 //   }
-//   if (!user.otp || !user.otpExpires) {
-//     BadRequestException({ message: "No OTP found" });
-//   }
+//   const { privateKey, publicKey } = generateKeyPair();
+//   const hashedPassword = await hash(userData.password);
 
-//   if (user.otpExpires < Date.now()) {
-//     user.otp = null;
-//     user.otpExpires = null;
-//     await user.save();
-//     BadRequestException({ message: "OTP has expired" });
-//   }
+//   const user = await userRepo.create({
+//     username: userData.username,
+//     email: userData.email,
+//     password: hashedPassword,
+//     publicKey: publicKey,
+//     privateKey: privateKey,
+//   });
 
-//   const isCompare = await compare(otp, user.otp);
-
-//   if (!isCompare) {
-//     BadRequestException({ message: "Invalid OTP" });
-//   }
-
-//   user.isConfirmed = true;
-//   user.otp = null;
-//   user.otpExpires = null;
-
-//   await user.save();
-
-//   return user;
+//   await generateAndSendOTP(userData.email, "verify");
+//   const result = {
+//     id: user._id,
+//     username: user.username,
+//     email: user.email,
+//     isConfirmed: user.isConfirmed,
+//   };
+//   return result;
 // };
+
 export const login = async (email, password) => {
   let existUser = await userRepo.findOne({ filter: { email } });
   if (!existUser) {
-    NotFoundException({ message: "You dont have account ,signup first!!" });
-  }
-  if (!existUser.isConfirmed) {
-    BadRequestException({ message: "Please confirm you email first!" });
+    NotFoundException({ message: "pLEASE VERIFY YOU ACCOUNT FIRST!" });
   }
 
   const isCompare = await compare(password, existUser.password);
@@ -112,10 +121,16 @@ export const refreshToken = async (authorization) => {
   const accessToken = generateToken({ id: user._id });
   return accessToken;
 };
+//GETTING USER FROM CACHE TO VERIFY THEIR ACCOUNTS THEN SAVING THEM INTO DB
 export const verifyAccount = async (email, otp, type) => {
   //check email existence
-  const userExist = await checkExistence(email);
-  if (!userExist) {
+  const user = await getFromCache(email);
+  const confirmedInDB = await checkExistence(email);
+  if (confirmedInDB?.isConfirmed === true) {
+    BadRequestException({ message: "Your account already verified!" });
+  }
+
+  if (user === null) {
     NotFoundException({
       message: "No such account found please create account first!",
     });
@@ -123,15 +138,39 @@ export const verifyAccount = async (email, otp, type) => {
 
   //verify otp
   await verifyOTP(otp, type, email);
-  const updatedUser = await userRepo.updateOne({
-    filter: { email },
-    update: { isConfirmed: true },
+  //save user into db  => isConfirmed -- true
+  const createdUser = await userRepo.create({
+    ...user,
+    isConfirmed: true,
   });
-  if (updatedUser) {
-    await otpRepo.deleteOne({ email, otpType: type });
-  }
-  return updatedUser;
+  console.log(createdUser);
+
+  await otpRepo.deleteOne({ email, otpType: type });
+  await redisClient.del(email);
+
+  return getUserWithNoSensitiveData(createdUser);
 };
+
+// export const verifyAccount = async (email, otp, type) => {
+//   //check email existence
+//   const userExist = await checkExistence(email);
+//   if (!userExist) {
+//     NotFoundException({
+//       message: "No such account found please create account first!",
+//     });
+//   }
+
+//   //verify otp
+//   await verifyOTP(otp, type, email);
+//   const updatedUser = await userRepo.updateOne({
+//     filter: { email },
+//     update: { isConfirmed: true },
+//   });
+//   if (updatedUser) {
+//     await otpRepo.deleteOne({ email, otpType: type });
+//   }
+//   return updatedUser;
+// };
 
 // export const forgotPasswordOTP = async (email) => {
 //   const user = await checkExistence(email);

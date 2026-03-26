@@ -80,7 +80,7 @@ export const accountVerification = async (req, res, next) => {
       res,
       status: 200,
       message: "Your email confirmed successfully",
-      data: { result: result.acknowledged },
+      data: { result },
     });
   } catch (error) {
     next(error);

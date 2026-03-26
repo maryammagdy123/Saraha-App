@@ -7,7 +7,7 @@ import {
   NotFoundException,
 } from "../../Utils/index.js";
 import { generateOTP } from "../../Utils/otp.utils.js";
-import { checkExistence } from "../Auth/auth.services.js";
+import { checkExistence, checkKeyExistence } from "../Auth/auth.services.js";
 export const getSubjectByType = (type) => {
   switch (type) {
     case "verify":
@@ -27,8 +27,8 @@ const expiresAtByType = (type) => {
   }
 };
 export const generateAndSendOTP = async (email, type) => {
-  const userExist = await checkExistence(email);
-  if (!userExist) {
+  const userExist = await checkKeyExistence(email);
+  if (userExist !== 1) {
     NotFoundException({ message: "User Not found Cannot send OTP ...!" });
   }
   const otp = generateOTP();
@@ -45,8 +45,8 @@ export const generateAndSendOTP = async (email, type) => {
 };
 
 export const resendOTP = async (email, type) => {
-  const user = await checkExistence(email);
-  if (user?.isConfirmed || !user) {
+const userExist = await checkKeyExistence(email);
+  if (userExist !== 1) {
     throw new Error("cannot send otp!");
   }
   const isOTPExistBefore = await otpRepo.findOne({
