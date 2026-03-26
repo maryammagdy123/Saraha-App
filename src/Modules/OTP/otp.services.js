@@ -28,7 +28,8 @@ const expiresAtByType = (type) => {
 };
 export const generateAndSendOTP = async (email, type) => {
   const userExist = await checkKeyExistence(email);
-  if (userExist !== 1) {
+  const existInDB = await checkExistence(email);
+  if (userExist !== 1 && !existInDB) {
     NotFoundException({ message: "User Not found Cannot send OTP ...!" });
   }
   const otp = generateOTP();
@@ -45,8 +46,9 @@ export const generateAndSendOTP = async (email, type) => {
 };
 
 export const resendOTP = async (email, type) => {
-const userExist = await checkKeyExistence(email);
-  if (userExist !== 1) {
+  const userExist = await checkKeyExistence(email);
+  const existInDB = await checkExistence(email);
+  if (userExist !== 1 || !existInDB) {
     throw new Error("cannot send otp!");
   }
   const isOTPExistBefore = await otpRepo.findOne({

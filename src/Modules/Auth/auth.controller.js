@@ -86,35 +86,36 @@ export const accountVerification = async (req, res, next) => {
     next(error);
   }
 };
-// export const forgotPassword = async (req, res, next) => {
-//   try {
-//     const { email } = req.body;
-//     await service.forgotPasswordOTP(email);
-//     return successResponse({
-//       res,
-//       status: 200,
-//       message: "Reset Password OTP sent to your email successfully!",
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-// export const confirmResetPassOTP = async (req, res, next) => {
-//   try {
-//     const { otp, email } = req.body;
-//     const result = await service.resetPassOTPConfirmation(otp, email);
-//     return successResponse({
-//       res,
-//       status: 200,
-//       message: "OTP confirmed sccussfully!",
-//       data: {
-//         result: true,
-//       },
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+
+export const sendForgotPasswordOTP = async (req, res, next) => {
+  try {
+    await service.forgotPasswordOTP(req.body);
+    return successResponse({
+      res,
+      status: 200,
+      message: "Reset Password OTP sent to your email successfully!",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const confirmResetPassOTP = async (req, res, next) => {
+  try {
+    await service.confirmForgotPasswordOTP(req.body);
+    return successResponse({
+      res,
+      status: 200,
+      message: "Your password reset successfully!",
+      data: {
+        result: true,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // export const resetNewPassword = async (req, res, next) => {
 //   try {
 //     const { password, confirmPassword, email } = req.body;

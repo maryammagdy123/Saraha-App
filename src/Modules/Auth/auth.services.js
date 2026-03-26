@@ -195,3 +195,32 @@ export const verifyAccount = async (email, otp, type) => {
 // export const resetPassword = async (password) => {
 
 // };
+
+export const forgotPasswordOTP = async (body) => {
+  let { email } = body;
+  const user = await checkExistence(email);
+  if (!user) {
+    NotFoundException({
+      message: "Please make sure you have account with this email!",
+    });
+  }
+  await generateAndSendOTP(email, "reset");
+};
+
+export const confirmForgotPasswordOTP = async (body) => {
+  let { email, otp, password, confirmPassword } = body;
+  let user = await checkExistence(email);
+  if (!user) {
+    NotFoundException({
+      message: "Incorrect email!!",
+    });
+  }
+  await verifyOTP(otp, "reset", email);
+  if (password !== confirmPassword) {
+    BadRequestException({ message: "Password does not match!" });
+  }
+  const hashedPassword = await hash(password);
+  user.password = hashedPassword;
+  await user.save();
+  await otpRepo.deleteOne({ email, otpType: "reset" });
+};
