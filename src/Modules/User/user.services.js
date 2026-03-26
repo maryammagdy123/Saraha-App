@@ -116,11 +116,10 @@ export const removeProfilePic = async (user) => {
   if (!user.profilePicture) {
     BadRequestException({ message: "No photo found to delete" });
   }
-  const imagePath = resolve(user.profilePicture);
-  if (existsSync(imagePath)) unlinkSync(imagePath);
-  // if (user.profilePicture) user.profilePicture = undefined;
-  // await user.save();
-  return imagePath;
+
+  user.profilePicture = undefined;
+  await user.save();
+  return true;
 };
 export const uploadCoverPhotos = async (user, file) => {
   //check images count , if already 2 replace new one with the oldest one
@@ -143,7 +142,7 @@ export const getUserProfile = async (userId) => {
       message: "User Not found!",
     });
   }
-  if (user?._id.toString()  !== userId.toString() ) user.profileVisits += 1;
+  if (user?._id.toString() !== userId.toString()) user.profileVisits += 1;
   await user.save();
 
   return (safeUser = getUserWithNoSensitiveData(user));
@@ -151,7 +150,7 @@ export const getUserProfile = async (userId) => {
 export const visitCount = async (userId) => {
   const user = await userRepo.findById({
     id: userId,
-    projection: {profileVisits:1},
+    projection: { profileVisits: 1 },
   });
   if (!user) {
     NotFoundException({ message: "User not found" });
