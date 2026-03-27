@@ -21,7 +21,8 @@ router.post(
 router.post("/login", validation(loginSchema, "body"), controller.login);
 
 router.post("/verify-2FA-otp", controller.verify2FA);
-// router.post("login-with-google", controller.loginWithGoogle);
+router.post("/signup/gmail", controller.signupWithGoogle);
+router.post("/login/gmail", controller.loginWithGoogle);
 router.patch(
   "/account/verify-account",
   validation(confirmOtpSchema, "body"),

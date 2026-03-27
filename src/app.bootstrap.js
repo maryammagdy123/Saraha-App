@@ -3,6 +3,7 @@ import express from "express";
 import { PORT } from "../config/config.service.js";
 import { authenticationDB, redisConnection } from "./DB/index.js";
 import { NotFoundException } from "./Utils/index.js";
+import cors from "cors";
 import {
   authRouter,
   messageRouter,
@@ -13,7 +14,8 @@ import { globalErrorHandling } from "./Middleware/error.middleware.js";
 
 const bootstrap = async () => {
   const app = express();
-  app.use(express.json());
+  app.use(cors(), express.json());
+
   await authenticationDB();
   await redisConnection();
 

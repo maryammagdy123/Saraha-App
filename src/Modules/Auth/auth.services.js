@@ -1,4 +1,5 @@
 import {
+  CLIENT_ID,
   REFRESH_EXPIRES_IN,
   REFRESH_TOKEN_SECRET_KEY,
 } from "../../../config/config.service.js";
@@ -15,9 +16,10 @@ import {
   NotFoundException,
   verifyToken,
 } from "../../Utils/index.js";
-
+import { OAuth2Client } from "google-auth-library";
 import { generateAndSendOTP, verifyOTP } from "../OTP/otp.services.js";
 import { getUserWithNoSensitiveData } from "../User/user.services.js";
+import { ProviderEnum, RoleEnum } from "../../Utils/Enums/user.enums.js";
 
 export const checkExistence = async (email) => {
   return await userRepo.findOne({ filter: { email } });
@@ -109,7 +111,7 @@ export const login = async (email, password) => {
     REFRESH_EXPIRES_IN,
   );
   if (!existUser) {
-    NotFoundException({ message: "PLEASE VERIFY YOU ACCOUNT FIRST!" });
+    NotFoundException({ message: "You don't have account , signup first!" });
   }
 
   const isCompare = await compare(password, existUser.password);
@@ -128,7 +130,7 @@ export const login = async (email, password) => {
 export const verify2FA = async (body) => {
   let { otp, email } = body;
   const user = await checkExistence(email);
- await  verifyOTP(otp, "2FA", email);
+  await verifyOTP(otp, "2FA", email);
   const accessToken = generateToken({ id: user._id });
   const refreshToken = generateToken(
     { id: user._id },
@@ -140,7 +142,81 @@ export const verify2FA = async (body) => {
     refreshToken,
   };
 };
-export const loginWithGoogle = async () => {};
+
+//login via google
+export const loginWithGoogle = async ({ idToken }) => {
+  const client = new OAuth2Client();
+
+  const ticket = await client.verifyIdToken({
+    idToken,
+    audience: CLIENT_ID,
+  });
+  const payload = ticket.getPayload();
+  const user = await userRepo.findOne({
+    filter: {
+      email: payload.email,
+      provider: ProviderEnum.Google,
+    },
+  });
+  if (!user) {
+    NotFoundException({
+      message: "You don't have account with this email , please signup first!",
+    });
+  }
+  if (user.twoFAisEnabled) {
+    await generateAndSendOTP(user.email, "2FA");
+    return "You have received a 2 factor authentication code on your email !";
+  }
+  const accessToken = generateToken({ id: user._id });
+  const refreshToken = generateToken(
+    { id: user._id },
+    REFRESH_TOKEN_SECRET_KEY,
+    REFRESH_EXPIRES_IN,
+  );
+  return {
+    accessToken,
+    refreshToken,
+  };
+};
+//signup via google
+export const signupWithGoogle = async ({ idToken }) => {
+  const { privateKey, publicKey } = generateKeyPair();
+  const client = new OAuth2Client();
+
+  const ticket = await client.verifyIdToken({
+    idToken,
+    audience: CLIENT_ID,
+  });
+  const payload = ticket.getPayload();
+  const isUserExist = await checkExistence(payload.email);
+  console.log(payload);
+  if (!payload?.email_verified) {
+    BadRequestException({ message: "Google failed verify your account!!!" });
+  }
+  if (isUserExist) {
+    if (isUserExist.provider === ProviderEnum.System) {
+      ConflictException({
+        message: "You already have an account with different provider!!",
+      });
+    }
+
+    //redirect to login with google
+    return await loginWithGoogle({ idToken });
+  }
+
+  const user = await userRepo.create({
+    username: payload.name,
+    email: payload.email,
+    provider: ProviderEnum.Google,
+    isConfirmed: payload.email_verified,
+    profilePicture: payload.picture,
+    publicKey,
+    privateKey,
+  });
+
+  return user;
+};
+
 export const refreshToken = async (authorization) => {
   const decoded = verifyToken(authorization, REFRESH_TOKEN_SECRET_KEY);
   const user = await userRepo.findById({ id: decoded.id });
@@ -150,6 +226,7 @@ export const refreshToken = async (authorization) => {
   const accessToken = generateToken({ id: user._id });
   return accessToken;
 };
+
 //GETTING USER FROM CACHE TO VERIFY THEIR ACCOUNTS THEN SAVING THEM INTO DB
 export const verifyAccount = async (email, otp, type) => {
   //check email existence

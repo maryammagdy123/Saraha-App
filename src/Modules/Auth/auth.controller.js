@@ -59,16 +59,41 @@ export const verify2FA = async (req, res, next) => {
       },
     });
   } catch (error) {
-    next(error)
+    next(error);
   }
 };
-
-// export const loginWithGoogle = async (req, res, next) => {
-//   try {
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+//signup with gmail
+export const signupWithGoogle = async (req, res, next) => {
+  try {
+    //id token =>comes from client side (FE)=>req.body
+    console.log(req.body);
+    const result = await service.signupWithGoogle(req.body);
+    successResponse({
+      res,
+      status: 201,
+      message: "done",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+//login with google
+export const loginWithGoogle = async (req, res, next) => {
+  try {
+    //id token =>comes from client side (FE)=>req.body
+    console.log(req.body);
+    const result = await service.loginWithGoogle(req.body);
+    successResponse({
+      res,
+      status: 200,
+      message: "done",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 export const refreshToken = async (req, res, next) => {
   try {
     const accessToken = await service.refreshToken(req.headers.authorization);
