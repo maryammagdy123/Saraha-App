@@ -9,8 +9,10 @@ import {
   resetPasswordSchema,
 } from "./auth.validation.js";
 import { uploadFiles } from "../../Utils/Multer/local.multer.utils.js";
+import { loginLimiter } from "../../Middleware/rate-limiter.js";
 
 const router = Router();
+
 //public routes
 router.post(
   "/signup",
@@ -18,7 +20,12 @@ router.post(
   validation(registerSchema, "body"),
   controller.signup,
 );
-router.post("/login", validation(loginSchema, "body"), controller.login);
+router.post(
+  "/login",
+  validation(loginSchema, "body"),
+  loginLimiter,
+  controller.login,
+);
 
 router.post("/verify-2FA-otp", controller.verify2FA);
 router.post("/signup/gmail", controller.signupWithGoogle);
