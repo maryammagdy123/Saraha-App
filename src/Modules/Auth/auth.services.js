@@ -22,32 +22,17 @@ import { generateAndSendOTP, verifyOTP } from "../OTP/otp.services.js";
 import { getUserWithNoSensitiveData } from "../User/user.services.js";
 import { ProviderEnum, RoleEnum } from "../../Utils/Enums/user.enums.js";
 import { sendOTPEmail } from "../../Utils/email.utils.js";
+import {
+  checkKeyExistence,
+  deleteFromCache,
+  getFromCache,
+  saveInCache,
+} from "../../DB/redis/redis.helper.js";
 
 export const checkExistence = async (email) => {
   return await userRepo.findOne({ filter: { email } });
 };
-export const checkKeyExistence = async (key) => {
-  return await redisClient.exists(key);
-};
-const getFromCache = async (key) => {
-  const cached = await redisClient.get(key);
-  if (!cached) return null;
-  try {
-    return JSON.parse(cached);
-  } catch {
-    return cached; // Return raw string (e.g., bcrypt hash)
-  }
-  // Returns parsed object or raw string
-};
-const saveInCache = async (key, value, ex = 1 * 24 * 60 * 60) => {
-  let formattedValue = value;
-  if (value && typeof value === "object") {
-    formattedValue = JSON.stringify(value);
-  } // else raw string/number etc.
-  return redisClient.set(key, formattedValue, {
-    EX: ex,
-  });
-};
+
 //SIGNUP AND SAVING USERS INTO REDIS CACHE UNTIL THEY VERIFY THEIR ACCOUNTS THEN SAVING THEM INTO DB
 export const signup = async (userData) => {
   const keyExist = await checkKeyExistence(userData.email);
@@ -260,8 +245,7 @@ export const verifyAccount = async (email, otp, type) => {
   console.log(createdUser);
 
   await otpRepo.deleteOne({ email, otpType: type });
-  await redisClient.del(email);
-
+  await deleteFromCache(email);
   return getUserWithNoSensitiveData(createdUser);
 };
 
@@ -403,6 +387,6 @@ export const resetPassword = async (body) => {
   const hashedPassword = await hash(password);
   user.password = hashedPassword;
   await user.save();
-  await redisClient.del(`USER:RESETPASSWORD:TOKEN:${email}`);
+  await deleteFromCache(`USER:RESETPASSWORD:TOKEN:${email}`);
   return true;
 };
