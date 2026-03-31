@@ -1,3 +1,5 @@
+import { redisClient } from "./redis.connection.js";
+
 export const checkKeyExistence = async (key) => {
   return await redisClient.exists(key);
 };

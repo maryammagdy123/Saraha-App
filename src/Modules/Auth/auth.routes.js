@@ -26,7 +26,7 @@ router.post(
   loginLimiter,
   controller.login,
 );
-
+router.post("/logout", verifyTokenMiddleware("strict"), controller.logout);
 router.post("/verify-2FA-otp", controller.verify2FA);
 router.post("/signup/gmail", controller.signupWithGoogle);
 router.post("/login/gmail", controller.loginWithGoogle);

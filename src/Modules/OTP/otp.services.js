@@ -1,3 +1,4 @@
+import { checkKeyExistence } from "../../DB/redis/redis.helper.js";
 import { otpRepo, userRepo } from "../../DB/Repo/index.js";
 import { sendOTPEmail } from "../../Utils/email.utils.js";
 import {
@@ -7,7 +8,7 @@ import {
   NotFoundException,
 } from "../../Utils/index.js";
 import { generateOTP } from "../../Utils/otp.utils.js";
-import { checkExistence, checkKeyExistence } from "../Auth/auth.services.js";
+import { checkExistence, } from "../Auth/auth.services.js";
 export const getSubjectByType = (type) => {
   switch (type) {
     case "verify":

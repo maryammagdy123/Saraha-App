@@ -184,3 +184,18 @@ export const resetPasswordWithToken = async (req, res, next) => {
     next(error);
   }
 };
+export const logout = async (req, res, next) => {
+  try {
+    const userId=req.user._id;
+    const token=req.headers.authorization;
+    const{refreshToken}=req.body;
+    await service.logout(userId,token,refreshToken);
+    return successResponse({
+      res,
+      status: 200,
+      message: "Logged out successfully!",
+    });
+  } catch (error) {
+    next(error);
+  }
+};

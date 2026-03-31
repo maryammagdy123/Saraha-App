@@ -97,12 +97,7 @@ export const signup = async (userData) => {
 
 export const login = async (email, password) => {
   let existUser = await userRepo.findOne({ filter: { email } });
-  const accessToken = generateToken({ id: existUser._id });
-  const refreshToken = generateToken(
-    { id: existUser._id },
-    REFRESH_TOKEN_SECRET_KEY,
-    REFRESH_EXPIRES_IN,
-  );
+
   if (!existUser) {
     NotFoundException({ message: "You don't have account , signup first!" });
   }
@@ -115,11 +110,39 @@ export const login = async (email, password) => {
     await generateAndSendOTP(email, "2FA");
     return "You have received a 2 factor authentication code on your email !";
   }
+  const accessToken = generateToken({ id: existUser._id });
+  const refreshToken = generateToken(
+    { id: existUser._id },
+    REFRESH_TOKEN_SECRET_KEY,
+    REFRESH_EXPIRES_IN,
+  );
+  //SAVE REFRESH TOKEN IN REDIS WITH EXPIRATION TIME
+  await saveInCache(
+    `REFRESH_TOKEN:${refreshToken}`,
+    existUser._id,
+    7 * 24 * 60 * 60,
+  ); //creating a key for refresh token with user id as value to verify it during logout and refresh token process(created session for this user)
   return {
     accessToken,
     refreshToken,
   };
 };
+
+export const logout = async (userId, token, refreshToken) => {
+  const storedRefreshToken = await getFromCache(
+    `REFRESH_TOKEN:${refreshToken}`,
+  );
+  //check if there is a session for this user
+  if (!storedRefreshToken || storedRefreshToken !== userId.toString()) {
+    console.log(storedRefreshToken, userId);
+    NotFoundException({ message: "No active session found for this user!" });
+  }
+  //delete refresh token from redis
+  await deleteFromCache(`REFRESH_TOKEN:${refreshToken}`);
+  await saveInCache(`BLACKLIST:${token}`, token, 60 * 60); //blacklist access token for 1 hour (until it expires) to prevent its reuse after logout
+  return true;
+};
+
 export const verify2FA = async (body) => {
   let { otp, email } = body;
   const user = await checkExistence(email);
@@ -130,6 +153,12 @@ export const verify2FA = async (body) => {
     REFRESH_TOKEN_SECRET_KEY,
     REFRESH_EXPIRES_IN,
   );
+  await saveInCache(
+    `REFRESH_TOKEN:${refreshToken}`,
+    user._id,
+    7 * 24 * 60 * 60,
+  );
+
   return {
     accessToken,
     refreshToken,
@@ -165,6 +194,11 @@ export const loginWithGoogle = async ({ idToken }) => {
     { id: user._id },
     REFRESH_TOKEN_SECRET_KEY,
     REFRESH_EXPIRES_IN,
+  );
+  await saveInCache(
+    `REFRESH_TOKEN:${refreshToken}`,
+    user._id,
+    7 * 24 * 60 * 60,
   );
   return {
     accessToken,
@@ -210,14 +244,15 @@ export const signupWithGoogle = async ({ idToken }) => {
   return user;
 };
 
-export const refreshToken = async (authorization) => {
-  const decoded = verifyToken(authorization, REFRESH_TOKEN_SECRET_KEY);
-  const user = await userRepo.findById({ id: decoded.id });
-  if (!user) {
-    NotFoundException({ message: "User Not Found!" });
-  }
-  const accessToken = generateToken({ id: user._id });
-  return accessToken;
+export const refreshToken = async (refreshToken) => {
+  const userId = await getFromCache(`REFRESH_TOKEN:${refreshToken}`);
+  if (!userId) throw new Error("Invalid session, please login again!");
+
+  verifyToken(refreshToken, REFRESH_TOKEN_SECRET_KEY);
+
+  const accessToken = generateToken({ id: userId });
+
+  return { accessToken };
 };
 
 //GETTING USER FROM CACHE TO VERIFY THEIR ACCOUNTS THEN SAVING THEM INTO DB

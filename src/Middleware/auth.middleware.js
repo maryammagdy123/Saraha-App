@@ -1,3 +1,5 @@
+import { redisClient } from "../DB/index.js";
+import { getFromCache } from "../DB/redis/redis.helper.js";
 import { userRepo } from "../DB/Repo/index.js";
 import { verifyToken } from "../Utils/index.js";
 
@@ -15,6 +17,12 @@ export const verifyTokenMiddleware = (mode = "strict", roles = []) => {
       }
       //.split(" ")[1]
       const token = authHeader;
+      const isBlacklisted = await getFromCache(`BLACKLIST:${token}`);
+      if (isBlacklisted) throw new Error("Token revoked");
+
+      if (isBlacklisted) {
+        throw new Error("Token revoked");
+      }
 
       const decoded = verifyToken(token);
       const user = await userRepo.findById({ id: decoded.id });
