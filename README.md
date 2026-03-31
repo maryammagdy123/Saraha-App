@@ -58,34 +58,41 @@ Utils: cross-env, cors
 - **Monitoring**: Error middleware preps for ELK/Prometheus.
 - **Scalability**: Modular repo pattern, horizontal scaling ready.
 
-## 🔌 API Endpoints (Swagger-like)
+## 🔌 API Endpoints Documentaion
+## Auth
 
-### Auth
-
-| Method | Path           | Desc           |
-| ------ | -------------- | -------------- |
-| POST   | `/auth/signup` | Register + OTP |
-| POST   | `/auth/login`  | JWT tokens     |
-| POST   | `/auth/gmail`  | Google OAuth   |
-
-### User (Auth Req.)
-
-| Method | Path                            | Desc                |
-| ------ | ------------------------------- | ------------------- |
-| GET    | `/user/profile/my-profile`      | Profile             |
-| PATCH  | `/user/profile`                 | Update              |
-| PATCH  | `/user/profile/profile-picture` | Upload (Cloudinary) |
-
-### Messages (Mostly Auth)
-
-| Method | Path                             | Desc         |
-| ------ | -------------------------------- | ------------ |
-| POST   | `/message/:receiverId`           | Send         |
-| POST   | `/message/anonymous/:receiverId` | Anon send    |
-| GET    | `/message/inbox/unread`          | Unread count |
-| PATCH  | `/message/:id/read`              | Mark read    |
-
-**Auth Header**: `Authorization: Bearer <token>`
+| Method | Endpoint                               | Headers                           | Body                                                                                                                          | Description                                 |
+| ------ | -------------------------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| POST   | `/api/auth/signup`                     | -                                 | `{ "username": "Mariam", "email": "mariammagdy2002@gmail.com", "password": "password123", "role": 0 }`                        | Create a new user account                   |
+| POST   | `/api/auth/login`                      | -                                 | `{ "email": "mayamga9@gmail.com", "password": "1234567890" }`                                                                 | User login; returns access & refresh tokens |
+| POST   | `/api/auth/logout`                     | `authorization: {{token}}`        | `{ "refreshToken": "{{refreshToken}}" }`                                                                                      | Logout current session                      |
+| POST   | `/api/auth/logout-all`                 | `authorization: {{token}}`        | `{ "email": "mayamga9@gmail.com", "password": "1234567890" }`                                                                 | Logout from all devices                     |
+| PATCH  | `/api/auth/account/verify-account`     | -                                 | `{ "email": "mariammagdy@gmail.com", "otp": "339698" }`                                                                       | Verify account using OTP                    |
+| POST   | `/api/auth/forgot-password/send-otp`   | -                                 | `{ "email": "maryomwrayom22@gmail.com" }`                                                                                     | Send OTP to reset password                  |
+| POST   | `/api/auth/forgot-password`            | -                                 | `{ "email": "mayamga9@gmail.com" }`                                                                                           | Request password reset link                 |
+| PATCH  | `/api/auth/reset-password`             | -                                 | `{ "email": "mayamga9@gmail.com", "token": "TOKEN_HERE", "password": "1234567890" }`                                          | Reset password using link                   |
+| PATCH  | `/api/auth/reset-password/confirm-otp` | -                                 | `{ "email": "maryomwrayom22@gmail.com", "otp": "917223", "password": "newpassword123", "confirmPassword": "newpassword123" }` | Reset password using OTP                    |
+| GET    | `/api/auth/refresh-token`              | `authorization: {{refreshToken}}` | -                                                                                                                             | Refresh access token                        |
+| POST   | `/api/auth/verify-2FA-otp`             | -                                 | `{ "email": "maryomwrayom22@gmail.com", "otp": "149508" }`                                                                    | Verify login with 2FA OTP                   |
+## Users
+| Method | Endpoint                            | Headers                    | Body                                                                | Description                |
+| ------ | ----------------------------------- | -------------------------- | ------------------------------------------------------------------- | -------------------------- |
+| GET    | `/api/user/profile/my-profile`      | `authorization: {{token}}` | -                                                                   | Get logged-in user profile |
+| PATCH  | `/api/user/profile`                 | `authorization: {{token}}` | `{ "username": "maryam" }`                                          | Update user profile        |
+| PATCH  | `/api/user/profile/password`        | `authorization: {{token}}` | `{ "currentPassword": "todo123456", "newPassword": "password123" }` | Change user password       |
+| PATCH  | `/api/user/profile/profile-picture` | `authorization: {{token}}` | FormData: `image: <file>`                                           | Upload profile picture     |
+| PATCH  | `/api/user/profile/cover-picture`   | `authorization: {{token}}` | FormData: `coverPhoto: <file>`                                      | Upload cover photo         |
+## Messages 
+| Method | Endpoint                                | Headers                    | Body                                      | Description              |
+| ------ | --------------------------------------- | -------------------------- | ----------------------------------------- | ------------------------ |
+| POST   | `/api/message/{{receiverId}}`           | `authorization: {{token}}` | `{ "content": "Hello!" }`                 | Send a message to a user |
+| POST   | `/api/message/anonymous/{{receiverId}}` | -                          | `{ "content": "Hello, I am anonymous!" }` | Send anonymous message   |
+| GET    | `/api/message/inbox`                    | `authorization: {{token}}` | -                                         | Get inbox messages       |
+| PATCH  | `/api/message/:messageId/read`          | `authorization: {{token}}` | -                                         | Mark message as read     |
+## OTP 
+| Method | Endpoint              | Headers | Body                                | Description |
+| ------ | --------------------- | ------- | ----------------------------------- | ----------- |
+| POST   | `/api/otp/resend-otp` | -       | `{ "email": "mayamga9@gmail.com" }` | Resend OTP  |
 
 ## 🏗️ Architecture
 
