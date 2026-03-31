@@ -118,7 +118,7 @@ export const login = async (email, password) => {
   );
   //SAVE REFRESH TOKEN IN REDIS WITH EXPIRATION TIME
   await saveInCache(
-    `REFRESH_TOKEN:${refreshToken}`,
+    `REFRESH_TOKEN:${existUser._id}:${refreshToken}`,
     existUser._id,
     7 * 24 * 60 * 60,
   ); //creating a key for refresh token with user id as value to verify it during logout and refresh token process(created session for this user)
@@ -130,18 +130,18 @@ export const login = async (email, password) => {
 
 export const logout = async (userId, token, refreshToken) => {
   const storedRefreshToken = await getFromCache(
-    `REFRESH_TOKEN:${refreshToken}`,
+    `REFRESH_TOKEN:${userId}:${refreshToken}`,
   );
   //check if there is a session for this user
   if (!storedRefreshToken || storedRefreshToken !== userId.toString()) {
-    console.log(storedRefreshToken, userId);
     NotFoundException({ message: "No active session found for this user!" });
   }
   //delete refresh token from redis
-  await deleteFromCache(`REFRESH_TOKEN:${refreshToken}`);
-  await saveInCache(`BLACKLIST:${token}`, token, 60 * 60); //blacklist access token for 1 hour (until it expires) to prevent its reuse after logout
+  await deleteFromCache(`REFRESH_TOKEN:${userId}:${refreshToken}`);
+  await saveInCache(`BLACKLIST:${userId}:${token}`, token, 60 * 60); //blacklist access token for 1 hour (until it expires) to prevent its reuse after logout
   return true;
 };
+
 
 export const verify2FA = async (body) => {
   let { otp, email } = body;
@@ -154,7 +154,7 @@ export const verify2FA = async (body) => {
     REFRESH_EXPIRES_IN,
   );
   await saveInCache(
-    `REFRESH_TOKEN:${refreshToken}`,
+    `REFRESH_TOKEN:${user._id}:${refreshToken}`,
     user._id,
     7 * 24 * 60 * 60,
   );

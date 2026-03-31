@@ -17,14 +17,17 @@ export const verifyTokenMiddleware = (mode = "strict", roles = []) => {
       }
       //.split(" ")[1]
       const token = authHeader;
-      const isBlacklisted = await getFromCache(`BLACKLIST:${token}`);
-      if (isBlacklisted) throw new Error("Token revoked");
+
+      const decoded = verifyToken(token);
+      const isBlacklisted = await getFromCache(
+        `BLACKLIST:${decoded.id}:${token}`,
+      );
+      if (isBlacklisted) throw new Error("Invalid Login Session");
 
       if (isBlacklisted) {
         throw new Error("Token revoked");
       }
-
-      const decoded = verifyToken(token);
+      console.log(decoded);
       const user = await userRepo.findById({ id: decoded.id });
       req.user = user;
       //req.user.id
